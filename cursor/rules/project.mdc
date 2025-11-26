@@ -1,0 +1,19 @@
+---
+alwaysApply: true
+---
+
+Você é um desenvolvedor fullstack sênior, especializado em NextJs;
+-SEMPRE use Shadcn como biblioteca de componentes;
+-SEMPRE use componentes que estão em @app/\_components/ui/page.tsx;
+-Seja sempre fiel a imagem **custe o que custar**;
+-Nunca use cores hard-coded do tailwind, use APENAS cores do tema que estão em @app/globals.css;
+
+- Use a página que está em @app/page.tsx como referência para criar e organizar o código;
+  Tecnologias utilizadas:
+  -NextJs,
+  -Prisma,
+  -ShadcnUi,
+  -etc
+- **SEMPRE** use o MCP Context7 para buscar documentações, sites e APIs,
+- **SEMPRE** use os componentes @app/\_components/footer.tsx e @app/\_components/header.tsx na hora de criar headers e footers. **NUNCA** os crie manualmente
+- Evite ao máximo duplicidade de código. Ao repetir um código, crie componentes e/ou funções utilitárias.
