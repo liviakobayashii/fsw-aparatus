@@ -11,7 +11,6 @@ import {
   PageSectionScroller,
   PageSectionTitle,
 } from "./_components/ui/page";
-import BookingItem from "./_components/booking-item";
 
 const Home = async () => {
   const recommendedBarbershops = await prisma.barbershop.findMany({
@@ -35,16 +34,6 @@ const Home = async () => {
           sizes="100vw"
           className="h-auto w-full"
         />
-        <PageSection>
-          <PageSectionTitle>Agendamentos</PageSectionTitle>
-          <BookingItem
-            serviceName="Corte de cabelo"
-            barbershopName="Barbearia do João"
-            barbershopImageUrl="https://utfs.io/f/c97a2dc9-cf62-468b-a851-bfd2bdde775f-16p.png"
-            date={new Date()}
-            status="confirmed"
-          />
-        </PageSection>
 
         <PageSection>
           <PageSectionTitle>Recomendados</PageSectionTitle>
