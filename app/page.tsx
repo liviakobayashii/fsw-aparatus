@@ -1,10 +1,9 @@
-import Header from "@/app/_components/header";
-import SearchInput from "./_components/search-input";
 import Image from "next/image";
-import banner from "@/public/banner.png";
+import Header from "./_components/header";
+import SearchInput from "./_components/search-input";
+import banner from "../public/banner.png";
 import { prisma } from "@/lib/prisma";
 import BarbershopItem from "./_components/barbershop-item";
-import { Divide } from "lucide-react";
 import Footer from "./_components/footer";
 import {
   PageContainer,
@@ -12,16 +11,19 @@ import {
   PageSectionScroller,
   PageSectionTitle,
 } from "./_components/ui/page";
+import BookingItem from "./_components/booking-item";
 
-export default async function Home() {
+const Home = async () => {
   const recommendedBarbershops = await prisma.barbershop.findMany({
-    orderBy: { name: "asc" },
+    orderBy: {
+      name: "asc",
+    },
   });
-
   const popularBarbershops = await prisma.barbershop.findMany({
-    orderBy: { name: "desc" },
+    orderBy: {
+      name: "desc",
+    },
   });
-
   return (
     <main>
       <Header />
@@ -35,13 +37,15 @@ export default async function Home() {
         />
         <PageSection>
           <PageSectionTitle>Agendamentos</PageSectionTitle>
-          {/* <BookingItem
+          <BookingItem
             serviceName="Corte de cabelo"
             barbershopName="Barbearia do João"
-            barbershopImageUrl="https://utfs.io/f/6b0888f8-b69f-4be7-a13b-52d1c0c9cab2-17m.png"
+            barbershopImageUrl="https://utfs.io/f/c97a2dc9-cf62-468b-a851-bfd2bdde775f-16p.png"
             date={new Date()}
-          /> */}
+            status="confirmed"
+          />
         </PageSection>
+
         <PageSection>
           <PageSectionTitle>Recomendados</PageSectionTitle>
           <PageSectionScroller>
@@ -50,6 +54,7 @@ export default async function Home() {
             ))}
           </PageSectionScroller>
         </PageSection>
+
         <PageSection>
           <PageSectionTitle>Populares</PageSectionTitle>
           <PageSectionScroller>
@@ -62,4 +67,6 @@ export default async function Home() {
       <Footer />
     </main>
   );
-}
+};
+
+export default Home;
