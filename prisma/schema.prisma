@@ -35,11 +35,14 @@ model BarbershopService {
 }
 
 model Booking {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   serviceId    String
   barbershopId String
-  date         DateTime @db.Timestamptz
-  cancelledAt  DateTime @db.Timestamptz
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  date         DateTime  @db.Timestamptz
+  cancelled    Boolean?  @default(false)
+  cancelledAt  DateTime? @db.Timestamptz
 }
 
 model User {
@@ -49,9 +52,10 @@ model User {
   emailVerified Boolean   @default(false)
   image         String?
   createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  updatedAt     DateTime  @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
+  bookings      Booking[]
 
   @@unique([email])
   @@map("user")
@@ -69,7 +73,6 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
-  @@index([userId])
   @@map("session")
 }
 
@@ -89,7 +92,6 @@ model Account {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  @@index([userId])
   @@map("account")
 }
 
@@ -99,8 +101,7 @@ model Verification {
   value      String
   expiresAt  DateTime
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  updatedAt  DateTime @default(now()) @updatedAt
 
-  @@index([identifier])
   @@map("verification")
 }

@@ -2,7 +2,6 @@ import Header from "@/app/_components/header";
 import SearchInput from "./_components/search-input";
 import Image from "next/image";
 import banner from "@/public/banner.png";
-import BookingItem from "./_components/booking-item";
 import { prisma } from "@/lib/prisma";
 import BarbershopItem from "./_components/barbershop-item";
 import { Divide } from "lucide-react";
@@ -36,12 +35,12 @@ export default async function Home() {
         />
         <PageSection>
           <PageSectionTitle>Agendamentos</PageSectionTitle>
-          <BookingItem
+          {/* <BookingItem
             serviceName="Corte de cabelo"
             barbershopName="Barbearia do João"
             barbershopImageUrl="https://utfs.io/f/6b0888f8-b69f-4be7-a13b-52d1c0c9cab2-17m.png"
             date={new Date()}
-          />
+          /> */}
         </PageSection>
         <PageSection>
           <PageSectionTitle>Recomendados</PageSectionTitle>

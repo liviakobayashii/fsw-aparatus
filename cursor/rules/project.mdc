@@ -13,7 +13,10 @@ Você é um desenvolvedor fullstack sênior, especializado em NextJs;
   -NextJs,
   -Prisma,
   -ShadcnUi,
-  -etc
+  -BetterAuth para autenticação.
+
 - **SEMPRE** use o MCP Context7 para buscar documentações, sites e APIs,
 - **SEMPRE** use os componentes @app/\_components/footer.tsx e @app/\_components/header.tsx na hora de criar headers e footers. **NUNCA** os crie manualmente
 - Evite ao máximo duplicidade de código. Ao repetir um código, crie componentes e/ou funções utilitárias.
+- **SEMPRE** ser 100% fiel a imagem em anexo **CUSTE O QUE CUSTAR**
+- **SEMPRE** use as mesmas cores que estiverem nas imagens que forem enviadas, mas nunca faça em harded code
