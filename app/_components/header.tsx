@@ -3,13 +3,15 @@
 import Image from "next/image";
 import MenuSheet from "./menu-sheet";
 
-export default function Header() {
+const Header = () => {
   return (
-    <header className="flex items-center justify-between bg-white px-5 py-6">
+    <header className="flex items-center justify-between bg-background px-5 py-6">
       <Image src="/logo.svg" alt="Aparatus" width={100} height={26.09} />
       <div className="flex items-center gap-2">
         <MenuSheet />
       </div>
     </header>
   );
-}
+};
+
+export default Header;
