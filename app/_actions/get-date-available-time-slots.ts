@@ -59,7 +59,7 @@ export const getDateAvailableTimeSlots = actionClient
             format(booking.date, "HH:mm"),
         );
         const availableTimeSlots = TIME_SLOTS.filter(
-            (slot) => !occupiedSlots.includes(slot),
+            (slot) => occupiedSlots.includes(slot),
         );
         return availableTimeSlots;
     });
