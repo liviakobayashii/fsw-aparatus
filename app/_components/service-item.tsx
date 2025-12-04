@@ -1,9 +1,8 @@
 "use client";
 
-import { Badge } from "./ui/badge";
-import { Card } from "./ui/card";
-import { Avatar } from "./ui/avatar";
-import { AvatarImage } from "@radix-ui/react-avatar";
+import Image from "next/image";
+import { BarbershopService, Barbershop } from "@/generated/prisma/client";
+import { Button } from "./ui/button";
 import {
   Sheet,
   SheetContent,
@@ -11,252 +10,232 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./ui/sheet";
-import { useState } from "react";
-import Image from "next/image";
-import { Button } from "./ui/button";
-import { useAction } from "next-safe-action/hooks";
-import { cancelBooking } from "../_actions/cancel-booking";
-import { toast } from "sonner";
-import { X } from "lucide-react";
+import { Calendar } from "./ui/calendar";
 import { Separator } from "./ui/separator";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "./ui/alert-dialog";
-import { Booking } from "@/generated/prisma/client";
-import PhoneItem from "./phone-item";
+import { useState } from "react";
+import { ptBR } from "date-fns/locale";
+import { useAction } from "next-safe-action/hooks";
+import { createBooking } from "../_actions/create-booking";
+import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { getDateAvailableTimeSlots } from "../_actions/get-date-available-time-slots";
+import { loadStripe } from "@stripe/stripe-js";
+import { createBookingCheckoutSession } from "../_actions/create-bookings-checkout-session";
 
-interface BookingItemProps {
-  booking: {
-    id: string;
-    date: Date;
-    cancelled: boolean | null;
-    service: {
-      name: string;
-      priceInCents: number;
-    };
-    barbershop: {
-      id: string;
-      name: string;
-      imageUrl: string;
-      address: string;
-      phones: string[];
-    };
+interface ServiceItemProps {
+  service: BarbershopService & {
+    barbershop: Barbershop;
   };
 }
 
-const getStatus = (booking: Pick<Booking, "date" | "cancelled">) => {
-  if (booking.cancelled) {
-    return "cancelled";
-  }
-  const date = new Date(booking.date);
-  const now = new Date();
-  return date >= now ? "confirmed" : "finished";
-};
-
-const BookingItem = ({ booking }: BookingItemProps) => {
+export function ServiceItem({ service }: ServiceItemProps) {
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [selectedTime, setSelectedTime] = useState<string | undefined>();
+  const { executeAsync, isPending } = useAction(createBooking);
+  const { executeAsync: executeCreateBookingCheckoutSession } = useAction(
+    createBookingCheckoutSession,
+  );
   const [sheetIsOpen, setSheetIsOpen] = useState(false);
-
-  const { execute: executeCancelBooking } = useAction(cancelBooking, {
-    onSuccess: () => {
-      toast.success("Reserva cancelada com sucesso!");
-      setSheetIsOpen(false);
-    },
-    onError: ({ error }) => {
-      toast.error(
-        error.serverError || "Erro ao cancelar reserva. Tente novamente.",
-      );
-    },
+  const { data: availableTimeSlots } = useQuery({
+    queryKey: ["date-available-time-slots", service.barbershopId, selectedDate],
+    queryFn: () =>
+      getDateAvailableTimeSlots({
+        barbershopId: service.barbershopId,
+        date: selectedDate!,
+      }),
+    enabled: Boolean(selectedDate),
   });
 
-  const handleCancelBooking = () => {
-    executeCancelBooking({ bookingId: booking.id });
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
   };
 
-  const status = getStatus(booking);
-  const isConfirmed = status === "confirmed";
+  const priceInReais = (service.priceInCents / 100).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+
+  const priceInReaisInteger = Math.floor(service.priceInCents / 100);
+
+  const formattedDate = selectedDate
+    ? selectedDate.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "short",
+    })
+    : "";
+
+  const isConfirmDisabled = !selectedDate || !selectedTime;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const handleConfirm = async () => {
+    if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+      toast.error("Erro ao criar checkout session");
+      return;
+    }
+    if (!selectedTime || !selectedDate) {
+      return;
+    }
+    const timeSplitted = selectedTime.split(":"); // [10, 00]
+    const hours = timeSplitted[0];
+    const minutes = timeSplitted[1];
+    const date = new Date(selectedDate);
+    date.setHours(Number(hours), Number(minutes));
+    const checkoutSessionResult = await executeCreateBookingCheckoutSession({
+      serviceId: service.id,
+      date,
+    });
+    if (
+      checkoutSessionResult.serverError ||
+      checkoutSessionResult.validationErrors
+    ) {
+      toast.error(checkoutSessionResult.validationErrors?._errors?.[0]);
+      return;
+    }
+    const stripe = await loadStripe(
+      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+    );
+    if (!stripe || !checkoutSessionResult.data?.id) {
+      toast.error("Erro ao carregar Stripe");
+      return;
+    }
+    await stripe.redirectToCheckout({
+      sessionId: checkoutSessionResult.data.id,
+    });
+    // // 10:00
+    // if (!selectedTime || !selectedDate) {
+    //   return;
+    // }
+
+    // const result = await executeAsync({
+    //   serviceId: service.id,
+    //   date,
+    // });
+    // if (result.serverError || result.validationErrors) {
+    //   toast.error(result.validationErrors?._errors?.[0]);
+    //   return;
+    // }
+    // toast.success("Agendamento criado com sucesso!");
+    // setSelectedDate(undefined);
+    // setSelectedTime(undefined);
+    // setSheetIsOpen(false);
+  };
 
   return (
     <Sheet open={sheetIsOpen} onOpenChange={setSheetIsOpen}>
-      <SheetTrigger asChild>
-        <Card className="flex h-full w-full min-w-full cursor-pointer flex-row items-center justify-between p-0">
-          <div className="flex flex-1 flex-col gap-4 p-4">
-            <Badge
-              className={
-                status === "confirmed"
-                  ? "bg-primary/10 text-primary uppercase"
-                  : "bg-muted text-muted-foreground uppercase"
-              }
-            >
-              {status === "confirmed"
-                ? "Confirmado"
-                : status === "finished"
-                  ? "Finalizado"
-                  : "Cancelado"}
-            </Badge>
-
-            <div className="flex flex-col gap-2">
-              <p className="font-bold">{booking.service.name}</p>
-              <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage src={booking.barbershop.imageUrl} />
-                </Avatar>
-                <p className="text-sm">{booking.barbershop.name}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex h-full w-[106px] flex-col items-center justify-center border-l py-3">
-            <p className="text-xs capitalize">
-              {booking.date.toLocaleDateString("pt-BR", { month: "long" })}
-            </p>
-            <p className="text-2xl">
-              {booking.date.toLocaleDateString("pt-BR", { day: "2-digit" })}
-            </p>
-            <p className="text-xs">
-              {booking.date.toLocaleTimeString("pt-BR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </p>
-          </div>
-        </Card>
-      </SheetTrigger>
-
-      <SheetContent className="w-[370px] overflow-y-auto p-0">
-        <SheetHeader className="px-5 pt-6">
-          <div className="flex items-center justify-between">
-            <SheetTitle>Informações da Reserva</SheetTitle>
-          </div>
-        </SheetHeader>
-
-        <div className="space-y-6 px-5 py-6">
-          {/* Imagem do mapa com informações da barbearia */}
-          <div className="relative h-[180px] w-full overflow-hidden rounded-lg">
-            <Image
-              src="/map.png"
-              alt="Localização da barbearia"
-              fill
-              className="object-cover"
-            />
-            <div className="bg-background absolute right-5 bottom-5 left-5 rounded-lg p-5">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={booking.barbershop.imageUrl} />
-                </Avatar>
-                <div className="flex-1">
-                  <p className="font-bold">{booking.barbershop.name}</p>
-                  <p className="text-muted-foreground truncate text-xs">
-                    {booking.barbershop.address}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Badge de status */}
-          <Badge
-            className={
-              isConfirmed
-                ? "bg-primary/10 text-primary uppercase"
-                : "bg-muted text-muted-foreground uppercase"
-            }
-          >
-            {isConfirmed ? "Confirmado" : "Finalizado"}
-          </Badge>
-
-          {/* Card com informações da reserva */}
-          <div className="bg-card space-y-3 rounded-lg border p-3">
-            <div className="flex items-center justify-between font-bold">
-              <p>{booking.service.name}</p>
-              <p className="text-sm">
-                {Intl.NumberFormat("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                }).format(booking.service.priceInCents / 100)}
-              </p>
-            </div>
-            <div className="text-muted-foreground flex items-center justify-between text-sm">
-              <p>Data</p>
-              <p>
-                {booking.date.toLocaleDateString("pt-BR", {
-                  day: "2-digit",
-                  month: "long",
-                })}
-              </p>
-            </div>
-            <div className="text-muted-foreground flex items-center justify-between text-sm">
-              <p>Horário</p>
-              <p>
-                {booking.date.toLocaleTimeString("pt-BR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
-            </div>
-            <div className="text-muted-foreground flex items-center justify-between text-sm">
-              <p>Barbearia</p>
-              <p>{booking.barbershop.name}</p>
-            </div>
-          </div>
-
-          {/* Telefones */}
-          {booking.barbershop.phones.length > 0 && (
-            <div className="space-y-3">
-              {booking.barbershop.phones.map((phone) => (
-                <PhoneItem key={phone} phone={phone} />
-              ))}
-            </div>
-          )}
+      <div className="border-border bg-card flex items-center justify-center gap-3 rounded-2xl border border-solid p-3">
+        <div className="relative size-[110px] shrink-0 overflow-hidden rounded-[10px]">
+          <Image
+            src={service.imageUrl}
+            alt={service.name}
+            fill
+            className="object-cover"
+          />
         </div>
 
-        {/* Botões no rodapé */}
-        <div className="flex gap-3 px-5 pb-6">
-          <Button
-            variant="outline"
-            className="flex-1 rounded-full"
-            onClick={() => setSheetIsOpen(false)}
-          >
-            Voltar
-          </Button>
-          {isConfirmed && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="flex-1 rounded-full">
-                  Cancelar Reserva
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Cancelar reserva</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Tem certeza que deseja cancelar esta reserva? Esta ação não
-                    pode ser desfeita.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Voltar</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleCancelBooking}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+        <div className="flex grow basis-0 flex-row items-center self-stretch">
+          <div className="relative flex h-full min-h-0 min-w-0 grow basis-0 flex-col items-start justify-between">
+            <div className="flex h-[67.5px] w-full flex-col items-start gap-1 text-sm leading-[1.4]">
+              <p className="text-card-foreground w-full font-bold">
+                {service.name}
+              </p>
+              <p className="text-muted-foreground w-full font-normal">
+                {service.description}
+              </p>
+            </div>
+
+            <div className="flex w-full items-center justify-between">
+              <p className="text-card-foreground text-sm leading-[1.4] font-bold whitespace-pre">
+                {priceInReais}
+              </p>
+              <SheetTrigger asChild>
+                <Button className="rounded-full px-4 py-2">Reservar</Button>
+              </SheetTrigger>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <SheetContent className="w-[370px] overflow-y-auto p-0">
+        <div className="flex h-full flex-col gap-6">
+          <SheetHeader className="px-5 pt-6">
+            <SheetTitle className="text-lg font-bold">Fazer Reserva</SheetTitle>
+          </SheetHeader>
+
+          <div className="flex flex-col gap-4 px-5">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleDateSelect}
+              disabled={{ before: today }}
+              className="w-full p-0"
+              locale={ptBR}
+            />
+          </div>
+
+          {selectedDate && (
+            <>
+              <Separator />
+
+              <div className="flex gap-3 overflow-x-auto px-5 [&::-webkit-scrollbar]:hidden">
+                {availableTimeSlots?.data?.map((time) => (
+                  <Button
+                    key={time}
+                    variant={selectedTime === time ? "default" : "outline"}
+                    className="shrink-0 rounded-full px-4 py-2"
+                    onClick={() => setSelectedTime(time)}
                   >
-                    Confirmar
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                    {time}
+                  </Button>
+                ))}
+              </div>
+
+              <Separator />
+
+              <div className="flex flex-col gap-3 px-5">
+                <div className="border-border bg-card flex w-full flex-col gap-3 rounded-[10px] border border-solid p-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-card-foreground text-base font-bold">
+                      {service.name}
+                    </p>
+                    <p className="text-card-foreground text-sm font-bold">
+                      R${priceInReaisInteger},00
+                    </p>
+                  </div>
+
+                  <div className="text-muted-foreground flex items-center justify-between text-sm">
+                    <p>Data</p>
+                    <p>{formattedDate}</p>
+                  </div>
+
+                  {selectedTime && (
+                    <div className="text-muted-foreground flex items-center justify-between text-sm">
+                      <p>Horário</p>
+                      <p>{selectedTime}</p>
+                    </div>
+                  )}
+
+                  <div className="text-muted-foreground flex items-center justify-between text-sm">
+                    <p>Barbearia</p>
+                    <p>{service.barbershop.name}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-5 pb-6">
+                <Button
+                  className="w-full rounded-full"
+                  disabled={isConfirmDisabled || isPending}
+                  onClick={handleConfirm}
+                >
+                  Confirmar
+                </Button>
+              </div>
+            </>
           )}
         </div>
       </SheetContent>
     </Sheet>
   );
-};
-
-export default BookingItem;
+}

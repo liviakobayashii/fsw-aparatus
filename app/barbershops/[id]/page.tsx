@@ -5,8 +5,8 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/app/_components/ui/button";
 import { Separator } from "@/app/_components/ui/separator";
-import { ServiceItem } from "@/app/_components/service-item";
 import PhoneItem from "@/app/_components/phone-item";
+import { ServiceItem } from "@/app/_components/service-item";
 
 const BarbershopPage = async (props: PageProps<"/barbershops/[id]">) => {
   const { id } = await props.params;
