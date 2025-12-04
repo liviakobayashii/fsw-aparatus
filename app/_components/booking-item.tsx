@@ -18,7 +18,7 @@ import { useAction } from "next-safe-action/hooks";
 import { cancelBooking } from "../_actions/cancel-booking";
 import { toast } from "sonner";
 import PhoneItem from "./phone-item";
-import { Booking } from "../generated/prisma/client";
+import { Booking } from "../../generated/prisma/client";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
 
 interface BookingItemProps {
