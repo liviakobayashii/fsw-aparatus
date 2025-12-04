@@ -17,9 +17,21 @@ import { Button } from "./ui/button";
 import { useAction } from "next-safe-action/hooks";
 import { cancelBooking } from "../_actions/cancel-booking";
 import { toast } from "sonner";
+import { X } from "lucide-react";
+import { Separator } from "./ui/separator";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "./ui/alert-dialog";
+import { Booking } from "@/generated/prisma/client";
 import PhoneItem from "./phone-item";
-import { Booking } from "../../generated/prisma/client";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
 
 interface BookingItemProps {
     booking: {
@@ -126,6 +138,7 @@ const BookingItem = ({ booking }: BookingItemProps) => {
                 </SheetHeader>
 
                 <div className="space-y-6 px-5 py-6">
+                    {/* Imagem do mapa com informações da barbearia */}
                     <div className="relative h-[180px] w-full overflow-hidden rounded-lg">
                         <Image
                             src="/map.png"
@@ -148,6 +161,7 @@ const BookingItem = ({ booking }: BookingItemProps) => {
                         </div>
                     </div>
 
+                    {/* Badge de status */}
                     <Badge
                         className={
                             isConfirmed
@@ -158,6 +172,7 @@ const BookingItem = ({ booking }: BookingItemProps) => {
                         {isConfirmed ? "Confirmado" : "Finalizado"}
                     </Badge>
 
+                    {/* Card com informações da reserva */}
                     <div className="bg-card space-y-3 rounded-lg border p-3">
                         <div className="flex items-center justify-between font-bold">
                             <p>{booking.service.name}</p>
@@ -192,6 +207,7 @@ const BookingItem = ({ booking }: BookingItemProps) => {
                         </div>
                     </div>
 
+                    {/* Telefones */}
                     {booking.barbershop.phones.length > 0 && (
                         <div className="space-y-3">
                             {booking.barbershop.phones.map((phone) => (
@@ -201,6 +217,7 @@ const BookingItem = ({ booking }: BookingItemProps) => {
                     )}
                 </div>
 
+                {/* Botões no rodapé */}
                 <div className="flex gap-3 px-5 pb-6">
                     <Button
                         variant="outline"
