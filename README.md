@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💈 SaaS de Agendamento para Barbearias
 
-## Getting Started
+Projeto desenvolvido durante o curso **FullStackWeekend**, com o objetivo de criar um sistema completo de agendamentos para barbearias. A plataforma permite que clientes encontrem estabelecimentos disponíveis, agendem serviços e acompanhem seus horários com praticidade. O sistema foi construído com foco em desempenho, usabilidade e integração com ferramentas modernas — incluindo assistente inteligente por voz e texto, pagamentos via Stripe e autenticação segura com BetterAuth.
 
-First, run the development server:
+## Funcionalidades
+- Listagem das barbearias disponíveis com detalhes dos serviços.
+- Agendamento rápido e intuitivo.
+- Visualização completa dos agendamentos realizados.
+- Assistente com IA para suporte por voz ou texto.
+- Integração de pagamentos via Stripe.
+- Autenticação segura com BetterAuth.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Tecnologias utilizadas
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Front-end
+- Next.js
+- TypeScript
+- TanStack Query
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Back-end
+- Postgres
+- Prisma
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Bibliotecas utilizadas
+- ShadCN
+- Tailwind CSS
+- Zod
+- Stripe (gateway de pagamento)
+- BetterAuth (autenticação)
