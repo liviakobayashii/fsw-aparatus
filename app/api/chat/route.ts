@@ -1,17 +1,16 @@
 import { streamText, convertToModelMessages, tool, stepCountIs } from "ai";
-import { openai } from "@ai-sdk/openai";
 import z from "zod";
 import { prisma } from "@/lib/prisma";
 import { getDateAvailableTimeSlots } from "@/app/_actions/get-date-available-time-slots";
 import { createBooking } from "@/app/_actions/create-booking";
-import { google } from "@ai-sdk/google";
+import { groq } from "@ai-sdk/groq";
 
 
 export const POST = async (request: Request) => {
     const { messages } = await request.json();
     const result = streamText({
-        model: google("gemini-2.0-flash"),
-        stopWhen: stepCountIs(10),
+        model: groq("llama-3.3-70b-versatile"),
+        stopWhen: stepCountIs(5),
         system: `Você é o Agenda.ai, um assistente virtual de agendamento de barbearias.
 
     DATA ATUAL: Hoje é ${new Date().toLocaleDateString("pt-BR", {
