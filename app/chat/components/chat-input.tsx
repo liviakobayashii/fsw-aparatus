@@ -25,14 +25,14 @@ export const ChatInput = ({
     };
 
     return (
-        <div className="bg-muted absolute bottom-0 left-0 flex w-full flex-col gap-2.5 p-5">
+        <div className="bg-muted flex w-full flex-col gap-2.5 p-4 md:p-5 md:rounded-t-xl">
             <div className="flex w-full gap-2">
                 <Input
                     value={input}
                     onChange={onChange}
                     onKeyDown={handleKeyDown}
                     placeholder="Digite sua mensagem"
-                    className="bg-background grow basis-0 rounded-full px-4 py-3 text-sm"
+                    className="bg-background grow basis-0 rounded-full px-4 py-3 text-sm md:py-4 md:text-base"
                     disabled={isLoading}
                 />
                 <Button

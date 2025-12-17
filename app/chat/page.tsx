@@ -7,6 +7,7 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { ChatMessage } from "./components/chat-message";
 import { ChatInput } from "./components/chat-input";
+import { Button } from "../_components/ui/button";
 
 const INITIAL_MESSAGES = [
     {
@@ -63,40 +64,50 @@ export default function ChatPage() {
     const isLoading = status === "streaming" || status === "submitted";
 
     return (
-        <div className="relative flex h-screen w-full flex-col overflow-hidden rounded-[20px] bg-[var(--background)]">
-            <div className="flex w-[390px] items-center justify-between pt-6 pr-5 pb-0 pl-5">
-                <Link href="/">
-                    <ChevronLeft className="size-6 shrink-0" />
-                </Link>
-                <p className="font-merriweather text-[20px] leading-[1.4] tracking-[-1px] text-nowrap whitespace-pre text-[var(--foreground)] italic">
-                    Aparatus
-                </p>
-                <div className="flex items-center justify-end gap-[15px]" />
+        <div className="flex min-h-screen w-full flex-col bg-background">
+            <header className="sticky top-0 z-50 border-b border-border bg-background">
+                <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-4 md:px-6">
+                    <Button variant="ghost" size="icon" asChild>
+                        <Link href="/">
+                            <ChevronLeft className="size-6" />
+                        </Link>
+                    </Button>
+                    <p className="font-merriweather text-xl leading-[1.4] tracking-[-1px] text-foreground italic md:text-2xl">
+                        Aparatus
+                    </p>
+                    <div className="size-10" />
+                </div>
+            </header>
+
+            <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col">
+                <div className="flex-1 overflow-y-auto pb-32 [&::-webkit-scrollbar]:hidden">
+                    {messages.length === 0
+                        ? INITIAL_MESSAGES.map((msg) => (
+                            <ChatMessage key={msg.id} message={msg} />
+                        ))
+                        : messages.map((msg, index) => (
+                            <ChatMessage
+                                key={msg.id}
+                                message={msg}
+                                isStreaming={
+                                    status === "streaming" && index === messages.length - 1
+                                }
+                            />
+                        ))}
+                    <div ref={messagesEndRef} />
+                </div>
             </div>
 
-            <div className="w-full flex-1 overflow-y-auto pb-24 [&::-webkit-scrollbar]:hidden">
-                {messages.length === 0
-                    ? INITIAL_MESSAGES.map((msg) => (
-                        <ChatMessage key={msg.id} message={msg} />
-                    ))
-                    : messages.map((msg, index) => (
-                        <ChatMessage
-                            key={msg.id}
-                            message={msg}
-                            isStreaming={
-                                status === "streaming" && index === messages.length - 1
-                            }
-                        />
-                    ))}
-                <div ref={messagesEndRef} />
+            <div className="fixed bottom-0 left-0 right-0 z-50">
+                <div className="mx-auto w-full max-w-4xl">
+                    <ChatInput
+                        input={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        onSubmit={handleSubmit}
+                        isLoading={isLoading}
+                    />
+                </div>
             </div>
-
-            <ChatInput
-                input={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onSubmit={handleSubmit}
-                isLoading={isLoading}
-            />
         </div>
     );
 }
