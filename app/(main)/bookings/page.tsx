@@ -2,14 +2,12 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import Header from "../_components/header";
-import Footer from "../_components/footer";
 import {
     PageContainer,
     PageSection,
     PageSectionTitle,
-} from "../_components/ui/page";
-import BookingItem from "../_components/booking-item";
+} from "../../_components/ui/page";
+import BookingItem from "../../_components/booking-item";
 
 const BookingsPage = async () => {
     const session = await auth.api.getSession({
@@ -44,16 +42,17 @@ const BookingsPage = async () => {
     );
 
     return (
-        <main className="flex h-screen min-h-screen flex-col">
-            <Header />
+        <main className="flex min-h-screen flex-col">
             <div className="flex-1">
                 <PageContainer>
-                    <h1 className="text-foreground text-xl font-bold">Agendamentos</h1>
+                    <h1 className="text-foreground text-xl font-bold md:text-2xl lg:text-3xl">
+                        Agendamentos
+                    </h1>
 
                     {confirmedBookings.length > 0 && (
                         <PageSection>
                             <PageSectionTitle>Confirmados</PageSectionTitle>
-                            <div className="space-y-3">
+                            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                                 {confirmedBookings.map((booking) => (
                                     <BookingItem key={booking.id} booking={booking} />
                                 ))}
@@ -64,7 +63,7 @@ const BookingsPage = async () => {
                     {finishedBookings.length > 0 && (
                         <PageSection>
                             <PageSectionTitle>Finalizados</PageSectionTitle>
-                            <div className="space-y-3">
+                            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                                 {finishedBookings.map((booking) => (
                                     <BookingItem key={booking.id} booking={booking} />
                                 ))}
@@ -73,13 +72,14 @@ const BookingsPage = async () => {
                     )}
 
                     {bookings.length === 0 && (
-                        <p className="text-muted-foreground text-center text-sm">
-                            Você ainda não tem agendamentos.
-                        </p>
+                        <div className="flex flex-col items-center justify-center py-12">
+                            <p className="text-muted-foreground text-center text-sm md:text-base">
+                                Você ainda não tem agendamentos.
+                            </p>
+                        </div>
                     )}
                 </PageContainer>
             </div>
-            <Footer />
         </main>
     );
 };
