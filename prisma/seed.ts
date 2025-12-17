@@ -8,6 +8,10 @@ const prisma = new PrismaClient({ adapter });
 
 async function seedDatabase() {
   try {
+    await prisma.booking.deleteMany({});
+    await prisma.barbershopService.deleteMany({});
+    await prisma.barbershop.deleteMany({});
+
     const images = [
       "https://utfs.io/f/c97a2dc9-cf62-468b-a851-bfd2bdde775f-16p.png",
       "https://utfs.io/f/45331760-899c-4b4b-910e-e00babb6ed81-16q.png",
@@ -31,7 +35,7 @@ async function seedDatabase() {
       "https://utfs.io/f/07842cfb-7b30-4fdc-accc-719618dfa1f2-17s.png",
       "https://utfs.io/f/0522fdaf-0357-4213-8f52-1d83c3dcb6cd-18e.png",
     ];
-    // Nomes criativos para as barbearias
+
     const creativeNames = [
       "Barbearia Vintage",
       "Corte & Estilo",
@@ -45,7 +49,6 @@ async function seedDatabase() {
       "Estilo Clássico",
     ];
 
-    // Endereços fictícios para as barbearias
     const addresses = [
       "Rua da Barbearia, 123",
       "Avenida dos Cortes, 456",
@@ -57,6 +60,19 @@ async function seedDatabase() {
       "Praça da Aparência, 505",
       "Rua Urbana, 606",
       "Avenida Clássica, 707",
+    ];
+
+    const descriptions = [
+      "Bem-vindo à Barbearia Vintage, onde o estilo clássico encontra a modernidade. Nossos barbeiros experientes são mestres na arte da barbearia tradicional, oferecendo cortes precisos e barbas impecáveis em um ambiente acolhedor e nostálgico.",
+      "Na Corte & Estilo, não apenas cortamos cabelo, nós criamos identidade. Especializados em cortes modernos e texturizados, nossa equipe está sempre atualizada com as últimas tendências. Oferecemos um serviço completo de grooming masculino.",
+      "Barba & Navalha é o refúgio do homem moderno. Aqui você encontra o verdadeiro ritual da barba com toalha quente e navalha, além de cortes de cabelo que realçam sua personalidade.",
+      "The Dapper Den oferece uma experiência de barbearia premium. Focados em detalhes e acabamentos perfeitos, nossos serviços são pensados para quem exige o melhor. Do corte clássico ao desbotado perfeito, garantimos sua satisfação.",
+      "Cabelo & Cia. é sinônimo de excelência e tradição. Com décadas de experiência, nossos profissionais oferecem cortes de alta qualidade para todas as idades. Um ambiente familiar e descontraído onde você se sente em casa.",
+      "Machado & Tesoura traz a robustez e a precisão para o seu corte. Especialistas em barbas lenhador e cortes militares, mas com versatilidade para todos os estilos. Use produtos de alta qualidade e saia pronto para qualquer desafio.",
+      "Elegância e sofisticação definem a Barbearia Elegance. Oferecemos um atendimento exclusivo e personalizado, focado em homens que valorizam a boa aparência. Serviços de estética facial e capilar em um ambiente luxuoso.",
+      "Sua imagem é nosso compromisso na Aparência Impecável. Combinamos técnicas tradicionais com ferramentas modernas para entregar resultados surpreendentes. Agende seu horário e descubra o melhor da sua aparência.",
+      "Estilo Urbano é a barbearia para quem vive a agitação da cidade. Cortes rápidos, práticos e cheios de atitude. Nossa equipe entende o ritmo urbano e entrega estilo sem perder tempo.",
+      "Resgatamos a essência do cavalheiro na Estilo Clássico. Cortes à tesoura, barba desenhada e um atendimento de primeira classe. Mais do que um corte, uma experiência de cavalheirismo e tradição.",
     ];
 
     const services = [
@@ -104,12 +120,12 @@ async function seedDatabase() {
       },
     ];
 
-    // Criar 10 barbearias com nomes e endereços fictícios
     const barbershops = [];
     for (let i = 0; i < 10; i++) {
       const name = creativeNames[i];
       const address = addresses[i];
       const imageUrl = images[i];
+      const description = descriptions[i];
 
       const barbershop = await prisma.barbershop.create({
         data: {
@@ -117,8 +133,7 @@ async function seedDatabase() {
           address,
           imageUrl: imageUrl,
           phones: ["(11) 99999-9999", "(11) 99999-9999"],
-          description:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ac augue ullamcorper, pharetra orci mollis, auctor tellus. Phasellus pharetra erat ac libero efficitur tempus. Donec pretium convallis iaculis. Etiam eu felis sollicitudin, cursus mi vitae, iaculis magna. Nam non erat neque. In hac habitasse platea dictumst. Pellentesque molestie accumsan tellus id laoreet.",
+          description: description,
         },
       });
 
